@@ -1,0 +1,36 @@
+import React from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { ThemeProvider } from 'styled-components';
+import { QueryCache, ReactQueryCacheProvider } from 'react-query';
+import { ReactQueryDevtools } from 'react-query-devtools';
+import { ToastProvider } from 'react-toast-notifications';
+import 'react-pagination-library/build/css/index.css';
+import AppRoutes from 'Routes';
+import theme from 'styles/theme';
+import './styles/normalize.scss';
+import GlobalStyle from 'styles/GlobalStyle';
+import AuthProvider from 'services/auth';
+
+const queryCache = new QueryCache();
+
+const App = () => {
+	return (
+		<ReactQueryCacheProvider queryCache={queryCache}>
+			<AuthProvider>
+				<ThemeProvider theme={theme}>
+					<ToastProvider autoDismiss>
+						<GlobalStyle />
+						<ReactQueryDevtools initialIsOpen />
+						<Router>
+							<React.Suspense fallback={<div>Loading Page...</div>}>
+								<AppRoutes />
+							</React.Suspense>
+						</Router>
+					</ToastProvider>
+				</ThemeProvider>
+			</AuthProvider>
+		</ReactQueryCacheProvider>
+	);
+};
+
+export default App;
