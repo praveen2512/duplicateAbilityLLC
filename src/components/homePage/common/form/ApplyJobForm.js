@@ -1,68 +1,121 @@
+import { useState } from "react";
 import { Button, toaster, TextInputField, FilePicker } from 'evergreen-ui';
 import { useForm } from "react-hook-form";
 import Axios from 'axios';
 import styled from 'styled-components';
 
+import './styles.css';
+
 import Logo from './logo.svg'
 
 const ApplyJobForm = () => {
-    const { register, handleSubmit } = useForm();
-    // const onSubmit = (data) => console.log(data)
+    const { register, handleSubmit, getValues } = useForm();
+
+    const [showOtpScreen, setShowOtpScreen] = useState(false);
+
     const onSubmit = (data) => {
-        console.log(`data : ${JSON.stringify(data)}`);
+        sendOTP(data?.['ApplyJobEmail']);
+    }
+
+    const sendOTP = async () => {
+        const email = getValues('ApplyJobEmail');
+        try {
+            const headerConfig = {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            };
+            let responseData = await (await Axios.post(`http://54.158.12.53:9900/v1/api/employee/${email}/minAccount`, {}, headerConfig)).data;
+            if (responseData) {
+            }
+            const request = {
+                email_address: email
+            };
+            Axios.post(`http://54.158.12.53:9900/v1/api/generate-OTP`, request)
+                .then(res => {
+                    toaster.notify("OTP Sent your email address");
+                    setShowOtpScreen(true);
+                })
+                .catch(e => toaster.warning('Something went wrong'))
+        } catch (error) {
+
+        }
+    }
+
+    const onSubmitOTP = (data) => {
         const request = {
-            email_address: data?.['ApplyJobEmail']
+            email_address: data?.['ApplyJobEmail'],
+            one_time_passcode: data?.['otp']
         };
-        Axios.post(`http://54.158.12.53:9900/v1/api/generate-OTP`, request)
-            .then(res => toaster.notify("OTP Sent your email address"))
+        Axios.post(`http://54.158.12.53:9900/v1/api/authenticate-OTP`, request)
+            .then(res => {
+                // toaster.notify("OTP Sent your email address");
+                // setShowOtpScreen(true);
+                if (res.data && res.data) {
+                    if (res.data?.['is_onetime_passcode_valid']) {
+                        const enc = window.btoa(`email=${data?.['ApplyJobEmail']}`);
+                        window.location.replace(`http://54.158.12.53:3000/onboard?p=${enc}`);
+                    }
+                    else {
+                        toaster.warning("Wrong OTP!");
+                    }
+                }
+                else {
+                    toaster.warning("Something went wrong!");
+                }
+
+            })
             .catch(e => toaster.warning('Something went wrong'))
     }
+
     return (
-        <Wrapper>
-            <Section className='main-wrapper'>
-                <div className='container section'>
-                    <div className='row'>
-
-                        <div className='col-md-12 d-flex justify-content-center'>
-                            <img src={Logo} alt="Ability" />
+        <div className='formContainer' >
+            <div className='formWrapper' >
+                <img src={Logo} alt="Ability" />
+                <h3 className="text-primary" style={{ color: "#50A656 !important" }} >Ability Options Job Applicaton Form</h3>
+                <p style={{ fontSize: "0.9rem", textAlign: 'center' }} >We are an equal opportunity employer, dedicated to a policy of non-discrimination in employment on any basis including race, color, national origin, age, sex, religion, disability status, marital status, protected veteran status, or any other characteristic protected by law. The following characters cannot be used on this form (%,&amp;,/,?,&gt;,&lt;,|,{`{,}`})</p>
+                <Card>
+                    <form onSubmit={handleSubmit(showOtpScreen ? onSubmitOTP : onSubmit)}>
+                        <TextInputField
+                            ref={register({ minLength: 3, required: true })}
+                            name='ApplyJobEmail'
+                            label="Enter your email"
+                            placeholder="Email"
+                            marginTop='0.2em'
+                            width='100%'
+                            required
+                        />
+                        {showOtpScreen && <TextInputField
+                            ref={register({ minLength: 3, required: true })}
+                            name='otp'
+                            label="OTP"
+                            placeholder="Enter OTP"
+                            marginTop='0.2em'
+                            width='100%'
+                            required
+                        />}
+                        <div className="btn-wrapper" >
+                            <Button
+                                appearance='primary'
+                                intent='success'
+                                marginTop='2em'
+                                height={36}>
+                                Submit
+                            </Button>
+                            {showOtpScreen && <Button
+                                type="button"
+                                appearance='primary'
+                                intent='success'
+                                marginTop='2em'
+                                height={36}
+                                onClick={() => sendOTP()} >
+                                Resend OTP
+                            </Button>}
                         </div>
-
-                        <div className='col-md-12 d-flex justify-content-center'>
-                            <H3 className="text-primary" style={{ color: "#50A656 !important" }} >Ability Options Job Applicaton Form</H3>
-                        </div>
-
-                        <div className='col-md-12 d-flex justify-content-center'>
-                            <p style={{fontSize: "1rem"}} >We are an equal opportunity employer, dedicated to a policy of non-discrimination in employment on any basis including race, color, national origin, age, sex, religion, disability status, marital status, protected veteran status, or any other characteristic protected by law. The following characters cannot be used on this form (%,&amp;,/,?,&gt;,&lt;,|,{`{,}`})</p>
-                        </div>
-
-                        <div className='col-md-12 d-flex justify-content-center'>
-                            <Card>
-                                <form onSubmit={handleSubmit(onSubmit)}>
-                                    <TextInputField
-                                        ref={register({ minLength: 3, required: true })}
-                                        name='ApplyJobEmail'
-                                        label="ApplyJobEmail"
-                                        placeholder="Email"
-                                        marginTop='0.2em'
-                                        width='100%'
-                                        required
-                                    />
-                                    <Button
-                                        appearance='primary'
-                                        intent='success'
-                                        marginTop='2em'
-                                        height={36}>
-                                        Submit
-                                    </Button>
-                                </form>
-                            </Card>
-                        </div>
-
-                    </div>
-
-                </div>
-            </Section>
-        </Wrapper>
+                    </form>
+                </Card>
+            </div>
+        </div>
     )
 }
 
