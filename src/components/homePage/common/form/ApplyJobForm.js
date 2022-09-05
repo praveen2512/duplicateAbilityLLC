@@ -25,15 +25,15 @@ const ApplyJobForm = () => {
                     "Content-Type": "application/json",
                 },
             };
-            let responseData = await (await Axios.post(`http://54.158.12.53:9900/v1/api/employee/${email}/minAccount`, {}, headerConfig)).data;
+            let responseData = await (await Axios.post(`http://${window.location.hostname}:9900/v1/api/employee/${email}/minAccount`, {}, headerConfig)).data;
             if (responseData) {
             }
             const request = {
                 email_address: email
             };
-            Axios.post(`http://54.158.12.53:9900/v1/api/generate-OTP`, request)
+            Axios.post(`http://${window.location.hostname}:9900/v1/api/generate-OTP`, request)
                 .then(res => {
-                    toaster.notify("OTP Sent your email address");
+                    toaster.notify("OTP Sent to your email address");
                     setShowOtpScreen(true);
                 })
                 .catch(e => toaster.warning('Something went wrong'))
@@ -47,14 +47,14 @@ const ApplyJobForm = () => {
             email_address: data?.['ApplyJobEmail'],
             one_time_passcode: data?.['otp']
         };
-        Axios.post(`http://54.158.12.53:9900/v1/api/authenticate-OTP`, request)
+        Axios.post(`http://${window.location.hostname}:9900/v1/api/authenticate-OTP`, request)
             .then(res => {
-                // toaster.notify("OTP Sent your email address");
+                // toaster.notify("OTP Sent to your email address");
                 // setShowOtpScreen(true);
                 if (res.data && res.data) {
                     if (res.data?.['is_onetime_passcode_valid']) {
                         const enc = window.btoa(`email=${data?.['ApplyJobEmail']}`);
-                        window.location.replace(`http://54.158.12.53:3000/onboard?p=${enc}`);
+                        window.location.replace(`http://${window.location.hostname}:3000/onboard?p=${enc}`);
                     }
                     else {
                         toaster.warning("Wrong OTP!");
