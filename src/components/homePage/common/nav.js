@@ -33,7 +33,8 @@ return(
         <Link className='dropdown-item' to="/mission">Our Mission</Link>
       </NavDropdown>
 
-      <Link to="/job" className="nav-link">Jobs</Link>
+      {/* <Link to="/job" className="nav-link">Jobs</Link> */}
+      <Link to="/apply" className="nav-link">Jobs</Link>
       <Link to="/contact" className="nav-link">Contact us</Link>
       <Link to="/login" className="nav-link">Staff Login</Link>
       <a href="https://0120a630-41e8-451f-ac66-3702e18f6fbb.filesusr.com/ugd/d6e898_76134ad843ba426c91602e0682136c54.pdf" target='_blank' rel="noreferrer" className="nav-link">

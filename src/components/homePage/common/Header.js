@@ -11,6 +11,7 @@ const Header = () => {
             <h6 className="text-uppercase">Welcome to Ability Options LLC</h6>
                 <h2 className='field text-uppercase'> Helping find Solutions for Mental Health </h2> <br/>
                 <Link to="/login" className="field btn btn-success btn-lg">Staff Login</Link>
+                <Link to="/apply" className="field btn btn-success btn-lg ml-5">Jobs</Link>
             </div>
         </div>
     </div>
